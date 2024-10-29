@@ -1,0 +1,140 @@
+<link rel="shortcut icon" href="icon.ico" type="image/x-icon">
+<h1>Welcome to Abaarso Books</h1>
+<p>Share and Download books for free</p>
+<hr>
+<a href="create.html" id="add-book-button">Add Book</a>
+<ul class="books-list" id="books-list">
+    
+</ul>
+
+<style>
+    body {
+        font-family: sans-serif;
+        background-color: #eeeeee;
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+        letter-spacing: 3px;
+        margin-bottom: 10px;
+    }
+
+    p {
+        color: red;
+        font-family: Helvetica, sans-serif;
+        font-size: 18px;
+    }
+
+    hr {
+        margin: 20px auto;
+        width: 60%;
+    }
+
+    #add-book-button {
+        background-color: #0073e6;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        text-decoration: none;
+    }
+
+    #add-book-button:hover {
+        background-color: #005bb5;
+    }
+
+    .books-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 600px;
+        text-align: center;
+        background-color: #f4f4f4;
+        color: #333;
+        border-radius: 5px;
+    }
+
+    .books-list li {
+        padding: 10px 15px;
+        border-bottom: 1px solid #ddd;
+        background-color: #e0e0e0;
+        color: #000;
+        text-align: left;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+    }
+
+    .books-list li:last-child {
+        border-bottom: none;
+    }
+
+    .books-list li:hover {
+        background-color: #d4d4d4;
+    }
+
+    .download-button {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #76c7c0;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 5px;
+        float: right;
+        margin-bottom: 5px;
+    }
+
+    .book-description {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .book-category {
+        font-size: 0.8rem;
+        color: #666;
+        display: block;
+        margin-top: 5px;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3.27.2/minified.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.11/runtime.min.js"></script>
+<script>
+    function fetchBooks() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/books", true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var books = JSON.parse(xhr.responseText);
+                var booksList = document.getElementById('books-list');
+                books.forEach(function(book) {
+                    var listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${book.name}</strong>
+                        <span class="book-category">${book.category}</span>
+                        <a href="${book.link}" target="_blank" download class="download-button">Download</a>
+                        <div class="book-description">${book.description}</div>
+                    `;
+                    booksList.appendChild(listItem);
+                });
+            } else {
+                console.error("Error fetching books:", xhr.statusText);
+            }
+        };
+        xhr.onerror = function() {
+            console.error("Request failed.");
+        };
+        xhr.send();
+    }
+
+    window.onload = function() {
+        fetchBooks();
+    };
+</script>
