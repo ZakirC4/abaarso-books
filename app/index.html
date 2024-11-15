@@ -1,0 +1,203 @@
+<link rel="shortcut icon" href="icon.ico" type="image/x-icon">
+<h1>Welcome to Abaarso Books</h1>
+<p>Share and Download books for free</p>
+<hr>
+<a href="create.html" id="add-book-button">Add Book</a>
+<ul class="books-list" id="books-list">
+    
+</ul>
+
+<style>
+    body {
+        font-family: sans-serif;
+        background-color: #eeeeee;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        color: #333;
+        font-size: 24px;
+        margin: 20px 0 10px;
+    }
+
+    p {
+        color: red;
+        font-size: 18px;
+        margin: 10px 0;
+    }
+
+    hr {
+        margin: 20px auto;
+        width: 60%;
+        border: 1px solid #333;
+    }
+
+    #add-book-button {
+        background-color: #0073e6;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 15px 0;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    #add-book-button:hover {
+        background-color: #005bb5;
+    }
+
+    .books-list {
+        list-style-type: none;
+        padding: 0;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 600px;
+        background-color: #f9f9f9;
+    }
+
+    .books-list li {
+        background-color: #e0e0e0;
+        color: #000;
+        padding: 10px;
+        margin: 10px auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: left;
+    }
+
+    .book-category {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+        display: block;
+    }
+
+    .book-description {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+        margin-bottom: 10px;
+    }
+
+    .download-button {
+        padding: 8px 15px;
+        background-color: #76c7c0;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+        margin-top: 8px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    // JSON Polyfill
+    if (!window.JSON) {
+        window.JSON = {
+            parse: function (sJSON) {
+                return eval('(' + sJSON + ')');
+            },
+            stringify: function (value) {
+                // Not a complete implementation, just a basic one for serializing simple objects
+                var t = typeof value;
+                if (t != "object" || value === null) {
+                    // simple data type
+                    if (t == "string") value = '"' + value.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+                    return String(value);
+                } else {
+                    // array or object
+                    var json = [], isArray = Array.isArray(value);
+                    for (var k in value) {
+                        if (value.hasOwnProperty(k)) {
+                            var v = isArray ? value[k] : k;
+                            json.push(JSON.stringify(v) + ":" + JSON.stringify(value[k]));
+                        }
+                    }
+                    return (isArray ? "[" : "{") + json.join(",") + (isArray ? "]" : "}");
+                }
+            }
+        };
+    }
+
+    // Array.prototype.forEach Polyfill
+    if (!Array.prototype.forEach) {
+        Array.prototype.forEach = function(callback, thisArg) {
+            if (this == null) {
+                throw new TypeError('this is null or not defined');
+            }
+            var O = Object(this);
+            var len = O.length >>> 0; // Convert to a Uint32
+            for (var i = 0; i < len; i++) {
+                if (i in O) {
+                    callback.call(thisArg, O[i], i, O);
+                }
+            }
+        };
+    }
+</script>
+
+<script>
+    function fetchBooks() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/api/books", true);
+        
+        xhr.onload = function() {
+            console.log("Response received:", xhr.responseText); // Log the raw response
+            if (xhr.status === 200) {
+                var books;
+                try {
+                    books = JSON.parse(xhr.responseText);
+                    console.log("Parsed books:", books); // Log the parsed books
+                } catch (e) {
+                    console.error("Error parsing JSON:", e.message);
+                    return; // Exit if parsing fails
+                }
+
+                // Ensure books is an array
+                if (Array.isArray(books)) {
+                    var booksList = document.getElementById('books-list');
+                    booksList.innerHTML = ''; // Clear previous list
+
+                    // Use a traditional for loop for better compatibility
+                    for (var i = 0; i < books.length; i++) {
+                        var book = books[i];
+                        if (!book.name || !book.category || !book.link) {
+                            console.error("Book data is missing fields:", book);
+                            continue; // Skip this entry
+                        }
+                        var listItem = document.createElement('li');
+                        
+                        // Using string concatenation instead of template literals
+                        listItem.innerHTML = 
+                            '<strong>' + book.name + '</strong>' +
+                            '<span class="book-category">' + book.category + '</span>' +
+                            '<div class="book-description">' + book.description + '</div>' +
+                            '<a href="' + book.link + '" target="_blank" download class="download-button">Download</a>';
+                        
+                        booksList.appendChild(listItem);
+                    }
+                } else {
+                    console.error("Data is not an array.");
+                }
+            } else {
+                console.error("Error fetching books:", xhr.statusText);
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error("Request failed.");
+        };
+
+        xhr.send();
+    }
+
+    window.onload = function() {
+        fetchBooks();
+    };
+</script>
